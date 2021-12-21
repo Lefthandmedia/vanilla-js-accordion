@@ -6,6 +6,47 @@
  */
 'use strict';
 
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    enumerableOnly && (symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    })), keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = null != arguments[i] ? arguments[i] : {};
+    i % 2 ? ownKeys(Object(source), !0).forEach(function (key) {
+      _defineProperty(target, key, source[key]);
+    }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) {
+      Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+    });
+  }
+
+  return target;
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
 var count = 0;
 var defaults = {
   item: '.item',
@@ -17,47 +58,11 @@ var defaults = {
   expanded: 'expanded',
   contracted: 'contracted',
   prefix: 'Accordion-',
-  transition: 'height .3s',
-  setFocus: 'none',
+  transition: 'height 0.3s',
+  setFocus: 'item',
   // options: none, item, panel, target, control, first
   hashEnabled: true
 }; // Pass in the objects to merge as arguments.
-// For a deep extend, set the first argument to `true`.
-
-var extend = function extend() {
-  // Variables
-  var extended = {};
-  var deep = false;
-  var i = 0;
-  var length = arguments.length; // Check if a deep merge
-
-  if (Object.prototype.toString.call(arguments[0]) === '[object Boolean]') {
-    deep = arguments[0];
-    i++;
-  } // Merge the object into the extended object
-
-
-  var merge = function merge(obj) {
-    for (var prop in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-        // If deep merge and property is an object, merge properties
-        if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
-          extended[prop] = extend(true, extended[prop], obj[prop]);
-        } else {
-          extended[prop] = obj[prop];
-        }
-      }
-    }
-  }; // Loop through each object and conduct a merge
-
-
-  for (; i < length; i++) {
-    var obj = arguments[i];
-    merge(obj);
-  }
-
-  return extended;
-};
 
 var focusPreviousTarget = function focusPreviousTarget(index) {
   var previous = index - 1;
@@ -101,6 +106,7 @@ var setFocusEnd = function setFocusEnd(item) {
 
 var transitionEnd = function transitionEnd(index) {
   var thisItem = this.items[index];
+  console.log('transitionEnd', index);
   thisItem.el.removeAttribute('style');
 
   if (thisItem.isExpanded) {
@@ -189,6 +195,7 @@ var expandAll = function expandAll() {
 };
 
 var activate = function activate(index) {
+  console.log('activate', index);
   var thisItem = this.items[index];
 
   if (thisItem.isExpanded) {
@@ -249,7 +256,9 @@ var bindEvents = function bindEvents() {
       activate.call(self, i);
     });
     item.el.addEventListener('transitionend', function (e) {
-      if (!self._enabled || e.target !== e.currentTarget) return;
+      console.log('addEventListener(transitionend', !self._enabled, e.target !== e.currentTarget, e);
+      scrollTo(); // if (!self._enabled || e.target !== e.currentTarget) return;
+
       transitionEnd.call(self, i);
     });
     item.target.addEventListener('keydown', function (e) {
@@ -383,7 +392,17 @@ var checkHash = function checkHash() {
       var thisHash = item.target.getAttribute('id');
 
       if (thisHash === hashKey) {
+        console.log('found it', item.target);
         activate.call(self, i);
+        self.actual = item.target;
+        console.log('self.actual', self, self.actual);
+        setTimeout(() => {
+          item.target.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+            inline: "start"
+          });
+        }, 500);
       }
     });
   }
@@ -392,8 +411,9 @@ var checkHash = function checkHash() {
 var Group = function Group(el, options) {
   count += 1;
   this.count = count;
-  this.el = el;
-  this.opts = extend(defaults, options);
+  this.el = el; // this.opts = extend(defaults, options);
+
+  this.opts = _objectSpread2(_objectSpread2({}, defaults), options);
   this._enabled = true;
 
   if (!this.el.hasAttribute('role')) {
