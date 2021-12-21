@@ -1,4 +1,4 @@
-var Accordion = require('../../cjs/accordion.js');
+var Accordion = require('../../cjs/accordion_class.js');
 
 var defaultAcc = new Accordion(document.querySelector('.Example1'));
 

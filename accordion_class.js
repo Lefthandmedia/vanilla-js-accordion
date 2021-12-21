@@ -1,52 +1,4 @@
-(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-/*!
- * @lefthandmedia/vanilla-js-accordion
- * undefined
- * @version 1.1.3
- * @license MIT Lefthandmedia
- */
-'use strict';
-
-function ownKeys(object, enumerableOnly) {
-  var keys = Object.keys(object);
-
-  if (Object.getOwnPropertySymbols) {
-    var symbols = Object.getOwnPropertySymbols(object);
-    enumerableOnly && (symbols = symbols.filter(function (sym) {
-      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-    })), keys.push.apply(keys, symbols);
-  }
-
-  return keys;
-}
-
-function _objectSpread2(target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = null != arguments[i] ? arguments[i] : {};
-    i % 2 ? ownKeys(Object(source), !0).forEach(function (key) {
-      _defineProperty(target, key, source[key]);
-    }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) {
-      Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-    });
-  }
-
-  return target;
-}
-
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-}
+"use strict";
 
 class Accordion {
   constructor(el, options) {
@@ -64,15 +16,15 @@ class Accordion {
       contracted: "contracted",
       prefix: "Accordion-",
       transition: "height 0.3s",
-      setFocus: "item",
-      // options: none, item, panel, target, control, first
-      hashEnabled: true
+      setFocus: "item", // options: none, item, panel, target, control, first
+      hashEnabled: true,
     };
+
     count += 1;
     this.count = count;
-    this.el = el; // this.opts = extend(defaults, options);
-
-    this.opts = _objectSpread2(_objectSpread2({}, defaults), options);
+    this.el = el;
+    // this.opts = extend(defaults, options);
+    this.opts = { ...defaults, ...options };
     this._enabled = true;
 
     if (!this.el.hasAttribute("role")) {
@@ -84,6 +36,7 @@ class Accordion {
     }
 
     this.items = this.createItems();
+
     this.bindEvents();
 
     if (this.opts.hashEnabled) {
@@ -93,64 +46,67 @@ class Accordion {
     this.init();
   }
 
-  init() {} // Pass in the objects to merge as arguments.
+  init() {
+
+  }
+
+  // Pass in the objects to merge as arguments.
   // For a deep extend, set the first argument to `true`.
-
-
   extend() {
     // Variables
     var extended = {};
     var deep = false;
     var i = 0;
-    var length = arguments.length; // Check if a deep merge
+    var length = arguments.length;
 
+    // Check if a deep merge
     if (Object.prototype.toString.call(arguments[0]) === "[object Boolean]") {
       deep = arguments[0];
       i++;
-    } // Merge the object into the extended object
+    }
 
-
-    var merge = function merge(obj) {
+    // Merge the object into the extended object
+    var merge = function (obj) {
       for (var prop in obj) {
         if (Object.prototype.hasOwnProperty.call(obj, prop)) {
           // If deep merge and property is an object, merge properties
-          if (deep && Object.prototype.toString.call(obj[prop]) === "[object Object]") {
+          if (
+            deep &&
+            Object.prototype.toString.call(obj[prop]) ===
+            "[object Object]"
+          ) {
             extended[prop] = extend(true, extended[prop], obj[prop]);
           } else {
             extended[prop] = obj[prop];
           }
         }
       }
-    }; // Loop through each object and conduct a merge
+    };
 
-
+    // Loop through each object and conduct a merge
     for (; i < length; i++) {
       var obj = arguments[i];
       merge(obj);
     }
 
     return extended;
-  }
+  };
 
   focusPreviousTarget(index) {
     var previous = index - 1;
-
     if (previous < 0) {
       previous = this.items.length - 1;
     }
-
     this.items[previous].target.focus();
-  }
+  };
 
   focusNextTarget(index) {
     var next = index + 1;
-
     if (next >= this.items.length) {
       next = 0;
     }
-
     this.items[next].target.focus();
-  }
+  };
 
   setFocusEnd(item) {
     var target = this.opts.setFocus;
@@ -159,18 +115,16 @@ class Accordion {
       case "item":
         item.el.focus();
         break;
-
       case "panel":
       case "target":
       case "control":
         item[target].focus();
         break;
-
       case "first":
         item.panel.querySelector("a, :input").focus();
         break;
     }
-  }
+  };
 
   transitionEnd(index) {
     var thisItem = this.items[index];
@@ -180,7 +134,9 @@ class Accordion {
       setFocusEnd.call(this, thisItem);
     } else {
       thisItem.panel.setAttribute("aria-hidden", "true");
+
       thisItem.el.setAttribute(this.opts.attribute, this.opts.contracted);
+
       thisItem.target.setAttribute("aria-expanded", "false");
 
       if (!this.opts.allowMultiple) {
@@ -189,22 +145,27 @@ class Accordion {
     }
 
     thisItem.inTransition = false;
-  }
+  };
 
   expand(index) {
     var thisItem = this.items[index];
     if (thisItem.isExpanded) return;
+
     var controlHeight = thisItem.control.offsetHeight;
 
     if (!thisItem.inTransition) {
-      thisItem.el.style.height = controlHeight.toString() + "px"; //repaint for iOS, kind of a hack
+      thisItem.el.style.height = controlHeight.toString() + "px";
 
+      //repaint for iOS, kind of a hack
       thisItem.el.getBoundingClientRect();
+
       thisItem.el.style.transition = this.opts.transition;
+
       thisItem.inTransition = true;
     }
 
     thisItem.el.setAttribute(this.opts.attribute, this.opts.expanded);
+
     thisItem.target.setAttribute("aria-expanded", "true");
 
     if (!this.opts.allowMultiple) {
@@ -212,45 +173,53 @@ class Accordion {
     }
 
     thisItem.panel.setAttribute("aria-hidden", "false");
+
     var panelHeight = thisItem.panel.offsetHeight;
     var totalHeight = controlHeight + panelHeight;
+
     thisItem.el.style.height = totalHeight.toString() + "px";
+
     thisItem.isExpanded = true;
 
     if (this.opts.setFocus === "target") {
       thisItem.target.focus();
     }
-  }
+  };
 
   contract(index) {
     var thisItem = this.items[index];
     if (!thisItem.isExpanded) return;
+
     var controlHeight = thisItem.control.offsetHeight;
 
     if (!thisItem.inTransition) {
       var panelHeight = thisItem.panel.offsetHeight;
       var totalHeight = controlHeight + panelHeight;
-      thisItem.el.style.height = totalHeight.toString() + "px"; // repaint for iOS, kind of a hack
 
+      thisItem.el.style.height = totalHeight.toString() + "px";
+
+      // repaint for iOS, kind of a hack
       thisItem.el.getBoundingClientRect();
+
       thisItem.el.style.transition = this.opts.transition;
+
       thisItem.inTransition = true;
     }
 
     thisItem.el.style.height = controlHeight.toString() + "px";
+
     thisItem.isExpanded = false;
-  }
+  };
 
   contractAll(skip) {
     var self = this;
     this.items.forEach(function (item, i) {
       if (i === skip) return;
-
       if (item.isExpanded) {
         contract.call(self, i);
       }
     });
-  }
+  };
 
   expandAll() {
     var self = this;
@@ -259,7 +228,7 @@ class Accordion {
         expand.call(self, i);
       }
     });
-  }
+  };
 
   activate(index) {
     var thisItem = this.items[index];
@@ -274,7 +243,7 @@ class Accordion {
     }
 
     expand.call(this, index);
-  }
+  };
 
   keyEvent(e, index) {
     // enter, space
@@ -282,78 +251,96 @@ class Accordion {
       e.preventDefault();
       activate.call(this, index);
       return;
-    } // end
+    }
 
-
+    // end
     if (e.which === 35) {
       e.preventDefault();
       this.items[this.items.length - 1].target.focus();
       return;
-    } // home
+    }
 
-
+    // home
     if (e.which === 36) {
       e.preventDefault();
       this.items[0].target.focus();
       return;
-    } // left arrow, up arrow
+    }
 
-
+    // left arrow, up arrow
     if (e.which === 37 || e.which === 38) {
       e.preventDefault();
       focusPreviousTarget.call(this, index);
       return;
-    } // right arrow, down arrow
+    }
 
-
+    // right arrow, down arrow
     if (e.which === 39 || e.which === 40) {
       e.preventDefault();
       focusNextTarget.call(this, index);
       return;
     }
-  }
+  };
 
   bindEvents() {
     var self = this;
+
     this.items.forEach(function (item, i) {
       item.target.addEventListener("click", function (e) {
         if (!self._enabled) return;
         e.preventDefault();
         this.activate(i);
       });
+
       item.el.addEventListener("transitionend", function (e) {
-        console.log("addEventListener(transitionend", !self._enabled, e.target !== e.currentTarget, e);
+        console.log(
+          "addEventListener(transitionend",
+          !self._enabled,
+          e.target !== e.currentTarget,
+          e
+        );
         if (!self._enabled || e.target !== e.currentTarget) return;
         transitionEnd.call(self, i);
       });
+
       item.target.addEventListener("keydown", function (e) {
         if (!self._enabled) return;
         keyEvent.call(self, e, i);
       });
     });
+
     window.addEventListener("hashchange", function () {
       if (self.opts.hashEnabled && self._enabled) {
         checkHash.call(self);
       }
     });
-  }
+  };
 
   unbindEvents() {
+    var self = this;
+
     this.items.forEach(function (item, i) {
       item.target.removeEventListener("click", activate);
+
       item.target.removeEventListener("keydown", keyEvent);
+
       item.el.removeEventListener("transitionend", transitionEnd);
     });
+
     this._enabled = false;
-  }
+  };
 
   createItems() {
     var self = this;
     var itemArray = Array.from(this.el.querySelectorAll(this.opts.item));
+
     return itemArray.map(function (item, i) {
       var el = item;
       var target = el.querySelector(self.opts.target);
-      var control = self.opts.target === self.opts.control ? target : el.querySelector(self.opts.control);
+      var control =
+        self.opts.target === self.opts.control
+          ? target
+          : el.querySelector(self.opts.control);
       var panel = el.querySelector(self.opts.panel);
 
       if (!target.hasAttribute("role")) {
@@ -368,7 +355,10 @@ class Accordion {
       var isExpanded = attribute === self.opts.expanded;
 
       if (!attribute) {
-        el.setAttribute(self.opts.attribute, isExpanded ? self.opts.expanded : self.opts.contracted);
+        el.setAttribute(
+          self.opts.attribute,
+          isExpanded ? self.opts.expanded : self.opts.contracted
+        );
       }
 
       target.setAttribute("aria-expanded", isExpanded);
@@ -384,17 +374,14 @@ class Accordion {
           if (el.hasAttribute("tabindex")) return;
           el.setAttribute("tabindex", "-1");
           break;
-
         case "panel":
           if (panel.hasAttribute("tabindex")) return;
           panel.setAttribute("tabindex", "-1");
           break;
-
         case "target":
           if (target.hasAttribute("tabindex")) return;
           target.setAttribute("tabindex", "0");
           break;
-
         case "control":
           if (control.hasAttribute("tabindex")) return;
           control.setAttribute("tabindex", "-1");
@@ -418,19 +405,25 @@ class Accordion {
         control: control,
         panel: panel,
         isExpanded: isExpanded,
-        inTransition: false
+        inTransition: false,
       };
     });
-  }
+  };
 
   removeAriaAttributes() {
     var self = this;
+
     this.el.removeAttribute("role");
     this.el.removeAttribute("aria-multiselectable");
+
     this.el.querySelectorAll(this.opts.item).forEach(function (el) {
       var target = el.querySelector(self.opts.target);
-      var control = self.opts.target === self.opts.control ? target : el.querySelector(self.opts.control);
+      var control =
+        self.opts.target === self.opts.control
+          ? target
+          : el.querySelector(self.opts.control);
       var panel = el.querySelector(self.opts.panel);
+
       el.removeAttribute("tabindex");
       target.removeAttribute("role");
       target.removeAttribute("aria-expanded");
@@ -441,48 +434,58 @@ class Accordion {
       panel.removeAttribute("tabindex");
       control.removeAttribute("tabindex");
     });
-  }
+  };
 
   destroy() {
     removeAriaAttributes.call(this);
     unbindEvents.call(this);
-  }
+  };
 
   checkHash() {
     var self = this;
 
     if (document.location.hash) {
       var hashKey = document.location.hash.split("#")[1];
+
       self.items.forEach(function (item, i) {
         var thisHash = item.target.getAttribute("id");
-
         if (thisHash === hashKey) {
           self.activate(i);
           setTimeout(() => {
             item.target.scrollIntoView({
               behavior: "smooth",
               block: "start",
-              inline: "start"
+              inline: "start",
             });
           }, 500);
         }
       });
     }
-  }
-
+  };
+ 
   enable() {
     this._enabled = true;
-  }
+  };
 
   disable() {
     this._enabled = false;
-  } // end class
+  }
 
-
+  // end class
 }
+
+export default Accordion;
+
+// Pass in the objects to merge as arguments.
 // For a deep extend, set the first argument to `true`.
+
+
+
+
 // var Group = function (el, options) {
+
 // };
+
 // Group.prototype.activate = activate;
 // Group.prototype.expand = expand;
 // Group.prototype.contract = contract;
@@ -498,37 +501,3 @@ class Accordion {
 // };
 // Group.prototype.destroy = destroy;
 // export default Group;
-
-module.exports = Accordion;
-
-},{}],2:[function(require,module,exports){
-var Accordion = require('../../cjs/accordion_class.js');
-
-var defaultAcc = new Accordion(document.querySelector('.Example1'));
-
-var multipleAcc = new Accordion(document.querySelector('.Example2'), {
-    allowMultiple: false,
-    setFocus: 'panel'
-});
-
-var hashAcc = new Accordion(document.querySelector('.Example3'), {
-    allowMultiple: false
-});
-
-document.querySelector('.destroy').addEventListener('click', function () {
-    defaultAcc.destroy();
-});
-
-document.querySelector('.enable').addEventListener('click', function() {
-    defaultAcc = new Accordion(document.querySelector('.Example1'));
-});
-
-document.querySelector('.expand').addEventListener('click', function () {
-    defaultAcc.expandAll();
-});
-
-document.querySelector('.contract').addEventListener('click', function () {
-    defaultAcc.contractAll();
-});
-
-},{"../../cjs/accordion_class.js":1}]},{},[2]);
